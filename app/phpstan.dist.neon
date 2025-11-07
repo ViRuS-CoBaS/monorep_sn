@@ -1,0 +1,10 @@
+includes:
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-doctrine/extension.neon  # Если используете Doctrine
+
+parameters:
+    level: 8  # Уровень строгости (начните с 0 и повышайте)
+    paths:
+        - src/
+    symfony:
+        container_xml_path: var/cache/dev/App_KernelDevDebugContainer.xml  # Для dev

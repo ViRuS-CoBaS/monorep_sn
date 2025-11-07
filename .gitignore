@@ -1,0 +1,47 @@
+# .gitignore для Symfony + Docker проекта
+
+# Секреты и окружение
+.env
+.env.*
+.env.local
+.env.*.local
+.env.backup
+!.env.example
+
+
+# Symfony
+/vendor/
+/var/
+/runtime/
+/public/build/
+public/bundles/
+.cache/
+.php_cs.cache
+.symfony/
+
+# Docker
+data/          # Volumes: postgres_data, redis_data и т.д.
+logs/          # Логи всех сервисов
+*.log          # Локальные лог-файлы
+
+# Build artifacts
+*.tar.gz
+*.tgz
+*.zip
+.DS_Store
+Thumbs.db
+
+# IDE и редакторы
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS-specific
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+

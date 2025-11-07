@@ -1,0 +1,43 @@
+# config/packages/patchlevel_event_sourcing.yaml
+patchlevel_event_sourcing:
+    # 1. Определение местоположения агрегатов и событий
+    aggregates:
+        directory: '%kernel.project_dir%/src'
+
+    events:
+        directory: '%kernel.project_dir%/src'
+
+    # 2. Настройка подключения к Event Store
+    connection:
+        url: 'dbal://event_store_connection'
+        provide_dedicated_connection: true
+    # 3. Конфигурация Event Bus для асинхронной доставки событий (проекций)
+    # Для интеграции с Symfony Messenger укажите service. Транспорт ('async_event') настраивается в config/packages/messenger.yaml
+    event_bus:
+        service: messenger.bus.event  # Или ваш сервис шины событий
+
+    # 4. Конфигурация Подписок (Проекторов) — добавьте при необходимости базовые настройки на корневом уровне
+    subscription:
+        catch_up: false  # По умолчанию false для продакшена; true в dev/test
+        throw_on_error: false
+        run_after_aggregate_save: false  # Для асинхронного режима используйте Messenger workers
+
+# --- Специфические настройки окружений (Dev и Test) ---
+when@dev:
+    patchlevel_event_sourcing:
+        subscription:
+            # Настройки, специфичные для режима разработки
+            auto_setup: true
+            rebuild_after_file_change: true
+
+            catch_up: true
+            throw_on_error: true
+            run_after_aggregate_save: true
+
+
+when@test:
+    patchlevel_event_sourcing:
+        subscription:
+            catch_up: true
+            throw_on_error: true
+            run_after_aggregate_save: true

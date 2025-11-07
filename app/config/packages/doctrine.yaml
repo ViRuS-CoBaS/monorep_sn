@@ -1,0 +1,93 @@
+doctrine:
+    dbal:
+        default_connection: read_model_connection  # Основное подключение
+        connections:
+            # 1. WRITE CONNECTION (Для Event Store)
+            event_store_connection:
+                url: '%env(resolve:DATABASE_URL_EVENT_STORE)%'
+                server_version: '16'  # Указывается здесь, если не в URL; в вашем .env уже ?serverVersion=16
+                profiling_collect_backtrace: '%kernel.debug%'
+                use_savepoints: true
+                driver: 'pdo_pgsql'
+                charset: 'utf8'
+                # 💡 Ключевые параметры подключения:
+                # Настройка для Write-heavy нагрузки:
+                options:
+                    # Увеличение таймаутов, если нагрузка записи высока
+                    connect_timeout: 10
+                    # Отключение/уменьшение кеширования результатов на уровне клиента (DBAL)
+                    driver_options:
+                        1000: false # Например, отключение кэширования метаданных
+
+        # 2. READ CONNECTION (Для Проекций)
+            read_model_connection: # Вторичная БД
+                url: '%env(resolve:DATABASE_URL_READ_MODEL)%'
+                server_version: '16'
+                profiling_collect_backtrace: '%kernel.debug%'
+                use_savepoints: true
+                driver: 'pdo_pgsql'
+                charset: 'utf8'
+                # 💡 Ключевые параметры подключения:
+                options:
+                    # Увеличение кеша на уровне клиента для повторяющихся запросов
+                    # (хотя лучше управлять кэшированием через Redis/Memcache)
+                    connect_timeout: 5
+                    # Для запросов Read Model обычно требуется меньший таймаут
+#            # 3. CCS CONNECTION (Для подключения к ЦКС)
+#            ccs_connection:
+#                url: '%env(resolve:DATABASE_URL_CCS)%'
+#                server_version: '16'
+    orm:
+        auto_generate_proxy_classes: true  # Автогенерация прокси-классов (dev: true; prod: false)
+        enable_lazy_ghost_objects: true    # Ленивая загрузка объектов (улучшает perf)
+        default_entity_manager: read_manager
+        # Глобальные параметры ORM (здесь, а не под entity_managers)
+        entity_managers:
+            # 1. READ MANAGER (Для Проекций)
+            read_manager:
+                connection: read_model_connection
+#                mappings:
+#                    # Здесь только Read Models (например, IssuerReadModel)
+#                    App\Domain\ClientContext\ReadModel\:
+#                        is_bundle: false
+#                        type: attribute
+#                        dir: '%kernel.project_dir%/src/Domain/ClientContext/ReadModel'
+#                        prefix: 'App\Domain\ClientContext\ReadModel'
+#                        alias: ReadModel
+            # 2. CCS READ MANAGER (Для ЦКС (только чтение, никакой записи))
+#            ccs_manager:
+#                connection: ccs_connection
+##                mappings:
+#                    # Здесь только Read Models (например, IssuerReadModel)
+#                    App\Domain\ClientContext\ReadModel\:
+#                        is_bundle: false
+#                        type: attribute
+#                        dir: '%kernel.project_dir%/src/Domain/ClientContext/ReadModel'
+#                        prefix: 'App\Domain\ClientContext\ReadModel'
+#                        alias: ReadModel
+
+when@test:
+    doctrine:
+        dbal:
+            # "TEST_TOKEN" is typically set by ParaTest
+            dbname_suffix: '_test%env(default::TEST_TOKEN)%'
+
+when@prod:
+    doctrine:
+        orm:
+            auto_generate_proxy_classes: false
+            proxy_dir: '%kernel.build_dir%/doctrine/orm/Proxies'
+            query_cache_driver:
+                type: pool
+                pool: doctrine.system_cache_pool
+            result_cache_driver:
+                type: pool
+                pool: doctrine.result_cache_pool
+
+    framework:
+        cache:
+            pools:
+                doctrine.result_cache_pool:
+                    adapter: cache.app
+                doctrine.system_cache_pool:
+                    adapter: cache.system

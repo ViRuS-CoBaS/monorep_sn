@@ -1,0 +1,16 @@
+{
+    admin off
+}
+
+frankenphp {
+    worker {
+        max_consecutive_failures 5
+        # Prod: Больше workers (авто по CPU)
+        workers auto
+    }
+    # Prod: Минимальные логи
+    log {
+        output stderr
+        level WARN
+    }
+}
