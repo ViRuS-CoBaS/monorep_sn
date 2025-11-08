@@ -3,7 +3,7 @@ includes:
     - vendor/phpstan/phpstan-doctrine/extension.neon  # Если используете Doctrine
 
 parameters:
-    level: 8  # Уровень строгости (начните с 0 и повышайте)
+    level: 9  # Уровень строгости (начните с 0 и повышайте)
     paths:
         - src/
     symfony:

@@ -9,9 +9,6 @@ DOMAIN="${APP_DOMAIN:-elkk.test}"
 CERT_CRT="/etc/angie/ssl/server.crt"
 CERT_KEY="/etc/angie/ssl/server.key"
 
-# Генерируем в temp, затем атомарно заменяем
-envsubst '${APP_DOMAIN} ${APP_HTTPS_PORT}' < /tmp/default.conf > /etc/angie/http.d/default.conf
-
 # Проверяем, существуют ли certs
 if [ ! -f "$CERT_CRT" ] || [ ! -f "$CERT_KEY" ]; then
     echo "Generating certificates with mkcert..."

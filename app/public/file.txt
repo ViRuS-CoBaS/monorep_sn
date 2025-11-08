@@ -1,0 +1,86 @@
+Array
+(
+    [GODEBUG] => cgocheck=0
+    [PHP_VERSION] => 8.4.14
+    [COMPOSER_ALLOW_SUPERUSER] => 1
+    [PHP_SHA256] => bac90ee7cf738e814c89b6b27d4d2c4b70e50942a420837e1a22f5fd5f9867a3
+    [REDIS_URL] => redis://redis
+    [PATH] => /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    [XDG_CONFIG_HOME] => /config
+    [PHP_INI_DIR] => /usr/local/etc/php
+    [HOME] => /root
+    [COMPOSE_PROFILES] => dev
+    [MERCURE_PUBLISHER_JWT_KEY] => &FFbtXxeaiXm!2VeVsXTScqdxkUE*#a%xyeDkdUv*UyQzqLl%cgw*ZM7KrTu0xjh
+    [POSTGRES_READ_DB] => symony_read_db
+    [MERCURE_URL] => http://mercure/.well-known/mercure
+    [POSTGRES_DB] => symony_write_db
+    [MERCURE_PUBLISH_URL] => https://elkk.test/hub
+    [PHP_CFLAGS] => -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+    [POSTGRES_PASSWORD] => symfony_test
+    [POSTGRES_USER] => symfony_test
+    [XDG_DATA_HOME] => /data
+    [PWD] => /app
+    [APP_DOMAIN] => elkk.test
+    [PHP_CPPFLAGS] => -fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+    [APP_ENV] => dev
+    [APP_RUNTIME] => Runtime\FrankenPhpSymfony\Runtime
+    [COMPOSER_HOME] => /tmp/composer
+    [GPG_KEYS] => AFD8691FDAEDF03BDF6E460563F15A9B715376CA 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6 0616E93D95AF471243E26761770426E17EBBB3DD
+    [PHPIZE_DEPS] => autoconf 		dpkg-dev 		file 		g++ 		gcc 		libc-dev 		make 		pkg-config 		re2c
+    [APP_DEBUG] => 1
+    [HOSTNAME] => a2899bdbada8
+    [PHP_URL] => https://www.php.net/distributions/php-8.4.14.tar.xz
+    [SERVER_NAME] => 
+    [MERCURE_SUBSCRIBER_JWT_KEY] => lov8L(vv3I&RKFD4u1bBDUEzt62BPIW#!iUVtWy(1^Z5evaV*R*s2z17oZyL&fxF
+    [PHP_LDFLAGS] => -Wl,-O1 -pie
+    [PHP_ASC_URL] => https://www.php.net/distributions/php-8.4.14.tar.xz.asc
+    [REMOTE_ADDR] => 
+    [REMOTE_HOST] => 
+    [REMOTE_PORT] => 
+    [DOCUMENT_ROOT] => /app/public
+    [PATH_INFO] => 
+    [PHP_SELF] => index.php
+    [DOCUMENT_URI] => index.php
+    [SCRIPT_FILENAME] => /app/public/index.php
+    [SCRIPT_NAME] => /index.php
+    [HTTPS] => 
+    [SSL_PROTOCOL] => 
+    [SSL_CIPHER] => 
+    [REQUEST_SCHEME] => http
+    [SERVER_PORT] => 80
+    [CONTENT_LENGTH] => 
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [SERVER_SOFTWARE] => FrankenPHP
+    [HTTP_HOST] => 
+    [AUTH_TYPE] => 
+    [REMOTE_IDENT] => 
+    [REQUEST_URI] => index.php
+    [CONTENT_TYPE] => 
+    [QUERY_STRING] => 
+    [REQUEST_METHOD] => GET
+    [FRANKENPHP_WORKER] => 1
+    [REQUEST_TIME_FLOAT] => 1762635517.4172
+    [REQUEST_TIME] => 1762635517
+    [argv] => Array
+        (
+        )
+
+    [argc] => 0
+    [SYMFONY_DOTENV_PATH] => /app/.env
+    [APP_SECRET] => your_app_secret_here
+    [DEFAULT_URI] => https://elkk.test
+    [DATABASE_URL_EVENT_STORE] => postgresql://symfony_test:symfony_test@postgres:5432/symony_write_db?serverVersion=16&charset=utf8
+    [DATABASE_URL_READ_MODEL] => postgresql://symfony_test:symfony_test@postgres:5432/symony_read_db?serverVersion=16&charset=utf8
+    [DATABASE_URL_CCS] => postgresql://:@:/?serverVersion=16&charset=utf8
+    [MESSENGER_TRANSPORT_DSN] => doctrine://default?auto_setup=0
+    [VAR_DUMPER_SERVER] => tcp://host.docker.internal:9912
+    [MAILER_DSN] => null
+    [EVENTSTORE_URL] => pdo-pgsql://app:!ChangeMe!@127.0.0.1:5432/app?serverVersion=16&charset=utf8
+    [CCS_USER] => 
+    [CCS_PASSWORD] => 
+    [CCS_DB] => 
+    [CCS_HOST] => 
+    [CCS_PORT] => 
+    [SYMFONY_DOTENV_VARS] => APP_SECRET,DEFAULT_URI,DATABASE_URL_EVENT_STORE,DATABASE_URL_READ_MODEL,DATABASE_URL_CCS,MESSENGER_TRANSPORT_DSN,VAR_DUMPER_SERVER,MAILER_DSN,EVENTSTORE_URL,CCS_USER,CCS_PASSWORD,CCS_DB,CCS_HOST,CCS_PORT
+)

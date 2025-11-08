@@ -1,6 +1,6 @@
  # По умолчанию dev; в prod: --build-arg APP_ENV=prod
 ARG APP_ENV=dev
-FROM dunglas/frankenphp:php8.4 AS base
+FROM dunglas/frankenphp-dev:php8.4 AS base
 
 # удобные переменные
 ENV APP_ENV=dev \

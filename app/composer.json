@@ -27,6 +27,7 @@
         "symfony/mercure": "^0.6.5",
         "symfony/mercure-bundle": "^0.3.9",
         "symfony/messenger": "7.3.*",
+        "symfony/monolog-bundle": "*",
         "symfony/property-access": "7.3.*",
         "symfony/property-info": "7.3.*",
         "symfony/runtime": "7.3.*",
@@ -65,6 +66,7 @@
         "symfony/polyfill-php82": "*"
     },
     "scripts": {
+        "cs-fix": "php-cs-fixer fix",
         "phpstan": "phpstan analyse",
         "phpstan:fix": "phpstan analyse --level=8 --error-format=raw",
         "rector": "rector process src --dry-run --clear-cache",
@@ -96,6 +98,7 @@
         }
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.89",
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-symfony": "^2.0",
         "phpunit/phpunit": "^12.4",

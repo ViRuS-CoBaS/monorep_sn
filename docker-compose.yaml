@@ -1,135 +1,132 @@
 services:
+  # --------------------
+  # 1. Reverse Proxy / Web Server
+  # --------------------
   angie:
-    build:
-      context: ./config/angie  # Директория с Dockerfile (config/angie/)
-      dockerfile: Dockerfile
-    ports:
-      - "8080:80"   # HTTP redirect
-      - "8443:443"  # HTTPS/HTTP3 (TCP + UDP для quic)
+    profiles: [ "angie" ]
+    image: docker.angie.software/angie:templated
+    container_name: elkk_angie_proxy
     volumes:
-      - ${ANGIE_CONF}:/etc/angie/angie.conf:ro    # ./config/angie/dev.conf
-      - ${ANGIE_HTTPD}:/tmp/default.conf  # ./config/angie/dev.conf
-      - ${ANGIE_CONF_SSL_DIR}:/etc/angie/ssl
-      - ${LOGS_DIR}/angie:/var/log/angie  # Логи в backend/logs/
-    depends_on:
-      - frankenphp
-      - mercure
-    networks:
-      - my-stack-network
+      - ./config/angie/${APP_ENV}:/etc/angie/:ro
     restart: unless-stopped
+    ports:
+      - "80:80"   # HTTP
+      - "443:443"  # HTTPS/HTTP3
+    depends_on:
+      frankenphp:
+        condition: service_healthy
+      mercure:
+        condition: service_healthy
+    networks:
+      - elkk-network
     environment:
-      - NGINX_ENTRYPOINT_QUIET_LOGS=1
       - APP_ENV=${APP_ENV}
       - APP_DOMAIN=${APP_DOMAIN}
-      - APP_HTTPS_PORT=${APP_HTTPS_PORT}
-    profiles:
-      - dev
-      - prod
+
+  # --------------------
+  # 2. PHP Приложение на Symfony с FrankenPHP
+  # --------------------
   frankenphp:
     build:
       context: ./app  # Строит из app/ (код Symfony)
-      dockerfile: Dockerfile  # Dockerfile из корня
-      args:
-        - APP_ENV=${APP_ENV}
+      dockerfile: ./config/frankenphp/${APP_ENV}/Dockerfile  # Dockerfile из корня
+    container_name: elkk_frankenphp
     volumes:
-      # Dev: Hot-reload; Prod: без (закомментируйте или используйте profiles)
-      - ${APP_ENV:+./app:/app}
-      - ${PHP_INI_FILE}:/usr/local/etc/php/conf.d/extra.ini:ro  # ./config/php/dev.ini
-      - ${CADDY_FILE}:/etc/frankenphp/Caddyfile:ro  # ./config/frankenphp/dev.Caddyfile
+      - ./app:/app
+      - caddy_config:/etc/caddy
+      - ./config/frankenphp/${APP_ENV}/php.ini:/usr/local/etc/php/conf.d/extra.ini:ro
+      - ./config/frankenphp/${APP_ENV}/Caddyfile:/etc/frankenphp/Caddyfile:ro
     env_file:
-      - .env.dev
-    #    environment:
-    #      - APP_RUNTIME=Runtime\FrankenPhpSymfony\Runtime
-    #      - DATABASE_URL=${DATABASE_URL}
-    #      - DATABASE_URL=${DATABASE_URL}
-    #      - DATABASE_URL_CCS=${DATABASE_URL_CCS}
-    #      - REDIS_URL=redis://redis:6379
-    #      - DEFAULT_URI=${DEFAULT_URI}
-    #      - MERCURE_SUBSCRIBER_JWT_KEY=${MERCURE_SUBSCRIBER_JWT_KEY}
-    #      - MERCURE_PUBLISHER_JWT_KEY=${MERCURE_PUBLISHER_JWT_KEY}
-    #      - MERCURE_URL=${MERCURE_URL}
-    #      - MERCURE_PUBLIC_URL=${MERCURE_PUBLIC_URL}
-    #      - MERCURE_PUBLIC_URL=${MERCURE_PUBLIC_URL}
-    #      - MAILER_DSN=${MAILER_DSN}
-    #      - MESSENGER_TRANSPORT_DSN=${MESSENGER_TRANSPORT_DSN}
-    #      - APP_ENV=${APP_ENV}
-    #      - TRUSTED_PROXIES=angie
+      - .env
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+      mercure:
+        condition: service_healthy # Mercure нужен в обоих режимах
     networks:
-      - my-stack-network
-    restart: unless-stopped
-    profiles:
-      - dev
-      - prod
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_READ_DB=${POSTGRES_READ_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    volumes:
-      - ${POSTGRES_CONF_DIR}/postgres.${APP_ENV}.conf:/etc/postgresql/postgresql.conf
-      - ${POSTGRES_CONF_DIR}/entrypoint.sh:/docker-entrypoint-initdb.d/20-entrypoint.sh
-      - ${DATA_DIR}/postgres:/var/lib/postgresql
-      - ${LOGS_DIR}/postgres:/var/log/postgresql
-    ports:
-      - "5433:5432"
-    networks:
-      - my-stack-network
+      - elkk-network
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
+      test: [ "CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:2015/healthz" ]
+      interval: 30s
       timeout: 5s
-      retries: 5
+      retries: 3
       start_period: 60s
+  # --------------------
+  # 3. Redis Cache/Queue
+  # --------------------
   redis:
-    image: redis:8.2.2-alpine3.22
-    command: redis-server --logfile /var/log/redis/redis-server.log --loglevel warning
+    image: redis:8.2.3-alpine
+    container_name: elkk_redis
     volumes:
-      - ${DATA_DIR}/redis:/data
-      - ${LOGS_DIR}/redis:/var/log/redis
+      - redis_data:/data
     networks:
-      - my-stack-network
+      - elkk-network
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       timeout: 5s
       retries: 5
       start_period: 60s
+  # --------------------
+  # 4. Mercure
+  # --------------------
   mercure:
-    image: dunglas/mercure:latest  # Официальный образ (v0.16+ на 2025)
-    ports:
-      - "3000:80"  # Локальный доступ (опционально; прокси через Angie)
-    volumes:
-      - ${LOGS_DIR}/mercure:/var/log/mercure  # Логи в ./logs/mercure/
+    image: dunglas/mercure:latest
+    container_name: elkk_mercure
     environment:
-      - CORS_ORIGINS=*  # Разрешить все origins (в prod: укажите домены)
-      - JWT_KEY=your-jwt-secret-key  # Тот же ключ, что в .env (генерируйте)
-      - MERCURE_PUBLISHER_JWT_KEY=${MERCURE_PUBLISHER_JWT_KEY}  # Из .env
-      - MERCURE_SUBSCRIBER_JWT_KEY=${MERCURE_SUBSCRIBER_JWT_KEY}  # Из .env
-      - REDIS_URL=redis://redis:6379  # Опционально: для scaling (pub/sub)
-      - APP_ENV=${APP_ENV}
+      - CORS_ORIGINS=*
+      # 1. КЛЮЧИ: Должны совпадать с теми, что в сервисе 'app'
+      - MERCURE_PUBLISHER_JWT_KEY=${MERCURE_PUBLISHER_JWT_KEY}
+      - MERCURE_SUBSCRIBER_JWT_KEY=${MERCURE_SUBSCRIBER_JWT_KEY}
+      - MERCURE_ALLOWED_ORIGINS=*
+    expose:
+      - 80
     depends_on:
       - redis
-    networks:
-      - my-stack-network
-    restart: unless-stopped
-    profiles:
-      - dev
-      - prod
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost/.well-known/mercure" ]
+      # Проверяем доступность хаба по внутреннему HTTP-порту (80)
+      test: [ "CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:80/healthz" ]
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 3
       start_period: 30s
-volumes:
-  pgdata:
+  postgres:
+    image: postgres:16-alpine
+    container_name: elkk_postgres
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_READ_DB=${POSTGRES_READ_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - ./config/postgres/${APP_ENV}/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./config/postgres/${APP_ENV}/entrypoint.sh:/docker-entrypoint-initdb.d/20-entrypoint.sh
+      #      - ./data/postgres:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
+      - ./logs/postgres:/var/log/postgresql
+    ports:
+      - "5432:5432"
+    networks:
+      - elkk-network
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+# --------------------
+# Сети и Тома
+# --------------------
 networks:
-  my-stack-network:
+  elkk-network:
+    name: elkk
     driver: bridge
+
+volumes:
+  redis_data:
+  caddy_config:
+  postgres_data:

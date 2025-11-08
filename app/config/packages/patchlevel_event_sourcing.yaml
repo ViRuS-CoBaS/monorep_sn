@@ -9,7 +9,7 @@ patchlevel_event_sourcing:
 
     # 2. Настройка подключения к Event Store
     connection:
-        url: 'dbal://event_store_connection'
+        url: '%env(resolve:DATABASE_URL_EVENT_STORE)%'
         provide_dedicated_connection: true
     # 3. Конфигурация Event Bus для асинхронной доставки событий (проекций)
     # Для интеграции с Symfony Messenger укажите service. Транспорт ('async_event') настраивается в config/packages/messenger.yaml

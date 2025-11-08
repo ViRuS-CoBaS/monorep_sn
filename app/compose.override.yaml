@@ -1,7 +1,0 @@
-
-services:
-###> patchlevel/event-sourcing-bundle ###
-  eventstore:
-    ports:
-      - "5432"
-###< patchlevel/event-sourcing-bundle ###
